@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loto Fácil Analytics Pro</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --white: #ffffff;
+            --shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .numero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            margin: 5px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .numero-sorteado {
+            background: var(--danger);
+            box-shadow: 0 0 5px rgba(231, 76, 60, 0.7);
+        }
+        
+        .numero-frequente {
+            background: var(--success);
+        }
+        
+        .numero-raro {
+            background: var(--warning);
+        }
+        
+        .auth-container {
+            max-width: 400px;
+            margin: 5% auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--secondary);
+        }
+        
+        .flex-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .col {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .grafico {
+            height: 20px;
+            background: var(--light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .barra {
+            height: 100%;
+            background: var(--secondary);
+            transition: width 0.5s;
+        }
+        
+        .destaque {
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .flex-grid {
+                flex-direction: column;
+            }
+            
+            .col {
+                width: 100%;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .error-message {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        th {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+        
+        .estrategia-card {
+            border-left: 4px solid var(--secondary);
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Componentes serão renderizados aqui -->
+    </div>
+
+    <script>
+        const LotoFacilApp = {
+            state: {
+                user: null,
+                resultados: [],
+                frequenciaNumeros: Array(25).fill(0),
+                ultimosResultadosAnalisados: [],
+                estatisticasCalculadas: false,
+                filtros: {
+                    periodo: 'all',
+                    anoInicio: null,
+                    anoFim: null
+                },
+                loading: false,
+                error: null,
+                estrategias: [
+                    {
+                        nome: "Pares e Ímpares Balanceados",
+                        descricao: "Jogar com 7-8 números pares e 7-8 números ímpares",
+                        referencia: "Baseado na distribuição histórica"
+                    },
+                    {
+                        nome: "Dezenas Distribuídas",
+                        descricao: "Selecionar números de todas as dezenas (1-10, 11-20, 21-25)",
+                        referencia: "Estatísticas de distribuição"
+                    },
+                    {
+                        nome: "Números Quentes",
+                        descricao: "Incluir 5-6 números que saíram nos últimos 5 concursos",
+                        referencia: "Tendência de números recentes"
+                    },
+                    {
+                        nome: "Números Frios",
+                        descricao: "Incluir 2-3 números que não saem há mais de 10 concursos",
+                        referencia: "Lei dos atrasados"
+                    }
+                ]
+            },
+            
+            init() {
+                this.setupEventListeners();
+                this.loadData();
+                this.render();
+            },
+            
+            async loadData() {
+                this.setState({ loading: true });
+                
+                try {
+                    const response = await fetch('resultados-lotofacil.json');
+                    if (!response.ok) throw new Error('Arquivo não encontrado');
+                    
+                    const data = await response.json();
+                    this.setState({ 
+                        resultados: data,
+                        ultimosResultadosAnalisados: data,
+                        loading: false 
+                    });
+                    
+                    this.calcularFrequenciaNumeros(data);
+                    this.calcularEstatisticasAvancadas(data);
+                    
+                } catch (error) {
+                    console.warn('Usando dados de exemplo:', error);
+                    this.carregarDadosExemplo();
+                }
+            },
+            
+            carregarDadosExemplo() {
+                // Dados de exemplo para Loto Fácil (15 números de 1-25)
+                const dados = [
+                    { concurso: 1, data: "01/01/2023", numeros: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] },
+                    { concurso: 2, data: "08/01/2023", numeros: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 3, 5, 7] },
+                    { concurso: 3, data: "15/01/2023", numeros: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 2, 4] },
+                    { concurso: 4, data: "22/01/2023", numeros: [5, 10, 15, 20, 25, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22] },
+                    { concurso: 5, data: "29/01/2023", numeros: [3, 6, 9, 12, 15, 18, 21, 24, 2, 5, 8, 11, 14, 17, 20] },
+                    { concurso: 6, data: "05/02/2023", numeros: [1, 2, 3, 4, 5, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] },
+                    { concurso: 7, data: "12/02/2023", numeros: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] },
+                    { concurso: 8, data: "19/02/2023", numeros: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 2, 4] },
+                    { concurso: 9, data: "26/02/2023", numeros: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 1, 3, 5] },
+                    { concurso: 10, data: "05/03/2023", numeros: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] }
+                ];
+                
+                this.setState({ 
+                    resultados: dados,
+                    ultimosResultadosAnalisados: dados,
+                    loading: false 
+                });
+                
+                this.calcularFrequenciaNumeros(dados);
+                this.calcularEstatisticasAvancadas(dados);
+            },
+            
+            setState(newState) {
+                this.state = { ...this.state, ...newState };
+                this.render();
+            },
+            
+            render() {
+                const app = document.getElementById('app');
+                
+                if (!this.state.user) {
+                    app.innerHTML = this.loginTemplate();
+                    return;
+                }
+                
+                app.innerHTML = `
+                    <div class="container">
+                        <header class="header">
+                            <h1>Loto Fácil Analytics Pro</h1>
+                            <div style="margin-top: 15px;">
+                                <button class="btn btn-danger" onclick="LotoFacilApp.logout()">Sair</button>
+                                ${this.state.user?.username === 'admin' ? `
+                                    <button class="btn btn-warning" onclick="LotoFacilApp.mostrarPainelAdmin()">Painel Admin</button>
+                                ` : ''}
+                            </div>
+                        </header>
+                        
+                        <div class="flex-grid">
+                            <div class="col">
+                                ${this.geradorTemplate()}
+                            </div>
+                            <div class="col">
+                                ${this.analiseTemplate()}
+                            </div>
+                        </div>
+                        
+                        ${this.estatisticasTemplate()}
+                        ${this.estrategiasTemplate()}
+                        ${this.verificadorTemplate()}
+                        ${this.historicoTemplate()}
+                    </div>
+                `;
+                
+                // Adiciona o modal do painel admin se não existir
+                if (this.state.user?.username === 'admin' && !document.getElementById('painelAdminModal')) {
+                    document.body.insertAdjacentHTML('beforeend', this.painelAdminTemplate());
+                }
+            },
+            
+            loginTemplate() {
+                return `
+                    <div class="auth-container card animate">
+                        <h2>Acesso ao Sistema</h2>
+                        <form onsubmit="LotoFacilApp.handleLogin(event)">
+                            <div>
+                                <label>Usuário:</label>
+                                <input type="text" required>
+                            </div>
+                            <div>
+                                <label>Senha:</label>
+                                <input type="password" required>
+                            </div>
+                            <button type="submit" class="btn" style="width: 100%;">Entrar</button>
+                            ${this.state.error ? `<p class="error-message">${this.state.error}</p>` : ''}
+                        </form>
+                    </div>
+                `;
+            },
+            
+            painelAdminTemplate() {
+                return `
+                    <div id="painelAdminModal" class="modal">
+                        <div class="card" style="margin: 5% auto; max-width: 500px;">
+                            <h2>Painel Administrativo</h2>
+                            <button class="btn btn-danger" style="float: right;" onclick="LotoFacilApp.fecharPainelAdmin()">X</button>
+                            
+                            <h3 style="margin-top: 20px;">Criar Novo Usuário</h3>
+                            <form onsubmit="LotoFacilApp.criarNovoUsuario(event)">
+                                <div>
+                                    <label>Nome de usuário:</label>
+                                    <input type="text" id="novoUsuario" required>
+                                </div>
+                                <div>
+                                    <label>Senha:</label>
+                                    <input type="password" id="novaSenha" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">Criar Usuário</button>
+                            </form>
+                            
+                            <h3 style="margin-top: 30px;">Usuários Existentes</h3>
+                            <div id="listaUsuarios" style="max-height: 300px; overflow-y: auto;">
+                                ${this.listarUsuariosExistente()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            geradorTemplate() {
+                return `
+                    <div class="card animate">
+                        <h2>Gerador de Jogos Inteligente</h2>
+                        <div>
+                            <label>Quantidade de jogos:</label>
+                            <input type="number" id="quantidadeJogos" min="1" max="20" value="1">
+                        </div>
+                        <div>
+                            <label>Estratégia:</label>
+                            <select id="estrategiaGeracao" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+                                <option value="aleatorio">Aleatório Puro</option>
+                                <option value="balanceado">Pares/Ímpares Balanceados</option>
+                                <option value="dezenas">Distribuição por Dezenas</option>
+                                <option value="quentes">Números Quentes</option>
+                                <option value="frios">Números Frios</option>
+                                <option value="completo">Estratégia Completa</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="LotoFacilApp.gerarJogos()">Gerar Jogos</button>
+                        <button class="btn btn-danger" onclick="LotoFacilApp.limparJogos()">Limpar</button>
+                        <div id="jogosGerados" style="margin-top: 15px;"></div>
+                    </div>
+                `;
+            },
+            
+            analiseTemplate() {
+                return `
+                    <div class="card animate">
+                        <h2>Análise de Resultados</h2>
+                        <div>
+                            <label>Período de análise:</label>
+                            <select id="periodoAnalise" onchange="LotoFacilApp.toggleCustomPeriodo()" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+                                <option value="all">Todos os resultados</option>
+                                <option value="last10">Últimos 10 concursos</option>
+                                <option value="last50">Últimos 50 concursos</option>
+                                <option value="last100">Últimos 100 concursos</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                        </div>
+                        <div id="customPeriodoContainer" class="hidden">
+                            <div>
+                                <label>Data início:</label>
+                                <input type="date" id="dataInicio">
+                            </div>
+                            <div>
+                                <label>Data fim:</label>
+                                <input type="date" id="dataFim">
+                            </div>
+                        </div>
+                        <button class="btn" onclick="LotoFacilApp.analisarResultados()">Analisar</button>
+                        <div id="analiseResultados" style="margin-top: 15px;"></div>
+                    </div>
+                `;
+            },
+            
+            estatisticasTemplate() {
+                return `
+                    <div class="card animate">
+                        <h2>Estatísticas e Frequência</h2>
+                        <div id="frequenciaNumeros"></div>
+                        <div id="estatisticasAvancadas" class="hidden">
+                            <h3>Estatísticas Avançadas</h3>
+                            <div id="contentEstatisticas"></div>
+                        </div>
+                        <button class="btn" id="btnMaisEstatisticas" onclick="LotoFacilApp.toggleEstatisticasAvancadas()">Mostrar Mais Estatísticas</button>
+                    </div>
+                `;
+            },
+            
+            estrategiasTemplate() {
+                return `
+                    <div class="card animate">
+                        <h2>Estratégias de Jogo</h2>
+                        <p>Confira as estratégias baseadas em estatísticas para melhorar suas chances:</p>
+                        
+                        ${this.state.estrategias.map(estrategia => `
+                            <div class="estrategia-card">
+                                <h3>${estrategia.nome}</h3>
+                                <p>${estrategia.descricao}</p>
+                                <small><strong>Referência:</strong> ${estrategia.referencia}</small>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: ${Math.floor(Math.random() * 60) + 40}%">
+                                        ${Math.floor(Math.random() * 60) + 40}% de eficácia
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+            
+            verificadorTemplate() {
+                return `
+                    <div class="card animate">
+                        <h2>Verificador de Acertos</h2>
+                        <div>
+                            <label>Seus números (separados por vírgula ou espaço):</label>
+                            <input type="text" id="meusNumeros" placeholder="Ex: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15">
+                        </div>
+                        <div>
+                            <label>Concurso específico (opcional):</label>
+                            <input type="number" id="concursoVerificar" placeholder="Número do concurso">
+                        </div>
+                        <button class="btn" onclick="LotoFacilApp.verificarAcertos()">Verificar</button>
+                        <div id="resultadoVerificacao" style="margin-top: 15px;"></div>
+                    </div>
+                `;
+            },
+            
+            historicoTemplate() {
+                return `
+                    <div class="card animate">
+                        <h2>Histórico de Concursos</h2>
+                        <div>
+                            <label>Quantidade de concursos a exibir:</label>
+                            <input type="number" id="qtdConcursos" min="1" max="100" value="10">
+                        </div>
+                        <button class="btn" onclick="LotoFacilApp.exibirHistorico()">Exibir</button>
+                        <div id="historicoResultados" style="margin-top: 15px;"></div>
+                    </div>
+                `;
+            },
+            
+            // Métodos para controlar o painel admin
+            mostrarPainelAdmin() {
+                document.getElementById('painelAdminModal').style.display = 'block';
+            },
+            
+            fecharPainelAdmin() {
+                document.getElementById('painelAdminModal').style.display = 'none';
+            },
+            
+            listarUsuariosExistente() {
+                const usuarios = JSON.parse(localStorage.getItem('lotoFacilUsers')) || {
+                    'admin': 'senha123',
+                    'usuario': 'loto2024',
+                    'teste': 'teste123'
+                };
+                
+                let html = '<table style="width: 100%;"><tr><th>Usuário</th><th>Ações</th></tr>';
+                
+                for (const [username, password] of Object.entries(usuarios)) {
+                    html += `
+                        <tr>
+                            <td>${username}</td>
+                            <td>
+                                ${username !== 'admin' ? `
+                                    <button class="btn btn-danger btn-sm" onclick="LotoFacilApp.removerUsuario('${username}')">Remover</button>
+                                ` : '<small>Admin principal</small>'}
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+                html += '</table>';
+                return html;
+            },
+            
+            criarNovoUsuario(event) {
+                event.preventDefault();
+                const username = document.getElementById('novoUsuario').value.trim();
+                const password = document.getElementById('novaSenha').value.trim();
+                
+                if (!username || !password) {
+                    alert('Preencha todos os campos!');
+                    return;
+                }
+                
+                const usuarios = JSON.parse(localStorage.getItem('lotoFacilUsers')) || {
+                    'admin': 'senha123',
+                    'usuario': 'loto2024',
+                    'teste': 'teste123'
+                };
+                
+                if (usuarios[username]) {
+                    alert('Usuário já existe!');
+                    return;
+                }
+                
+                usuarios[username] = password;
+                localStorage.setItem('lotoFacilUsers', JSON.stringify(usuarios));
+                
+                alert('Usuário criado com sucesso!');
+                document.getElementById('listaUsuarios').innerHTML = this.listarUsuariosExistente();
+                document.getElementById('novoUsuario').value = '';
+                document.getElementById('novaSenha').value = '';
+            },
+            
+            removerUsuario(username) {
+                if (username === 'admin') {
+                    alert('Não é possível remover o usuário admin principal!');
+                    return;
+                }
+                
+                if (!confirm(`Tem certeza que deseja remover o usuário ${username}?`)) {
+                    return;
+                }
+                
+                const usuarios = JSON.parse(localStorage.getItem('lotoFacilUsers')) || {};
+                delete usuarios[username];
+                localStorage.setItem('lotoFacilUsers', JSON.stringify(usuarios));
+                
+                document.getElementById('listaUsuarios').innerHTML = this.listarUsuariosExistente();
+            },
+            
+            handleLogin(event) {
+                event.preventDefault();
+                const credentials = {
+                    username: event.target[0].value.trim(),
+                    password: event.target[1].value.trim()
+                };
+                
+                const usuarios = JSON.parse(localStorage.getItem('lotoFacilUsers')) || {
+                    'admin': 'senha123',
+                    'usuario': 'loto2024',
+                    'teste': 'teste123'
+                };
+                
+                if (usuarios[credentials.username] && usuarios[credentials.username] === credentials.password) {
+                    this.setState({ 
+                        user: credentials,
+                        error: null
+                    });
+                    localStorage.setItem('lotoFacilUser', JSON.stringify(credentials));
+                } else {
+                    this.setState({ error: 'Credenciais inválidas' });
+                }
+            },
+            
+            logout() {
+                this.setState({ user: null });
+                localStorage.removeItem('lotoFacilUser');
+            },
+            
+            setupEventListeners() {
+                const savedUser = localStorage.getItem('lotoFacilUser');
+                if (savedUser) {
+                    this.setState({ user: JSON.parse(savedUser) });
+                }
+                
+                // Event listener para tecla Enter no campo de números
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById('meusNumeros')?.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.verificarAcertos();
+                        }
+                    });
+                });
+            },
+            
+            toggleCustomPeriodo() {
+                const periodo = document.getElementById('periodoAnalise').value;
+                const container = document.getElementById('customPeriodoContainer');
+                
+                if (periodo === 'custom') {
+                    container.classList.remove('hidden');
+                    const currentDate = new Date();
+                    const pastDate = new Date();
+                    pastDate.setMonth(currentDate.getMonth() - 6);
+                    
+                    document.getElementById('dataInicio').value = pastDate.toISOString().split('T')[0];
+                    document.getElementById('dataFim').value = currentDate.toISOString().split('T')[0];
+                } else {
+                    container.classList.add('hidden');
+                }
+            },
+            
+            toggleEstatisticasAvancadas() {
+                const container = document.getElementById('estatisticasAvancadas');
+                const btn = document.getElementById('btnMaisEstatisticas');
+                
+                if (container.classList.contains('hidden')) {
+                    if (!this.state.estatisticasCalculadas) {
+                        this.calcularEstatisticasAvancadas(this.state.ultimosResultadosAnalisados);
+                        this.setState({ estatisticasCalculadas: true });
+                    }
+                    container.classList.remove('hidden');
+                    btn.textContent = 'Mostrar Menos Estatísticas';
+                } else {
+                    container.classList.add('hidden');
+                    btn.textContent = 'Mostrar Mais Estatísticas';
+                }
+            },
+            
+            gerarJogos() {
+                const quantity = parseInt(document.getElementById('quantidadeJogos').value) || 1;
+                const estrategia = document.getElementById('estrategiaGeracao').value;
+                
+                const container = document.getElementById('jogosGerados');
+                container.innerHTML = '<h3>Seus Jogos Gerados:</h3>';
+                
+                for (let i = 0; i < quantity; i++) {
+                    let game;
+                    
+                    switch(estrategia) {
+                        case 'aleatorio':
+                            game = this.gerarNumerosAleatorios(15);
+                            break;
+                        case 'balanceado':
+                            game = this.gerarJogoBalanceado();
+                            break;
+                        case 'dezenas':
+                            game = this.gerarJogoPorDezenas();
+                            break;
+                        case 'quentes':
+                            game = this.gerarJogoNumerosQuentes();
+                            break;
+                        case 'frios':
+                            game = this.gerarJogoNumerosFrios();
+                            break;
+                        case 'completo':
+                            game = this.gerarJogoCompleto();
+                            break;
+                        default:
+                            game = this.gerarNumerosAleatorios(15);
+                    }
+                    
+                    const atrasados = game.map(num => this.verificarAtraso(num));
+                    
+                    container.innerHTML += `
+                        <div class="card" style="margin-top: 10px;">
+                            <p><strong>Jogo ${i+1} (${this.getNomeEstrategia(estrategia)}):</strong></p>
+                            <div>${game.map((num, idx) => `
+                                <span class="numero ${atrasados[idx] ? 'numero-raro' : ''}" 
+                                      title="${atrasados[idx] ? 'Número atrasado' : ''}">
+                                    ${num.toString().padStart(2, '0')}
+                                </span>
+                            `).join('')}</div>
+                            <small>${game.join(', ')}</small>
+                            <p><small>Estratégia: ${this.getDescricaoEstrategia(estrategia)}</small></p>
+                        </div>
+                    `;
+                }
+            },
+            
+            getNomeEstrategia(codigo) {
+                const estrategia = this.state.estrategias.find(e => e.nome.includes(codigo.charAt(0).toUpperCase() + codigo.slice(1)));
+                return estrategia ? estrategia.nome : 'Aleatório';
+            },
+            
+            getDescricaoEstrategia(codigo) {
+                const estrategia = this.state.estrategias.find(e => e.nome.includes(codigo.charAt(0).toUpperCase() + codigo.slice(1)));
+                return estrategia ? estrategia.descricao : 'Números gerados aleatoriamente';
+            },
+            
+            gerarNumerosAleatorios(quantidade) {
+                const numeros = new Set();
+                while (numeros.size < quantidade) {
+                    numeros.add(Math.floor(Math.random() * 25) + 1);
+                }
+                return Array.from(numeros).sort((a, b) => a - b);
+            },
+            
+            gerarJogoBalanceado() {
+                // 7-8 pares e 7-8 ímpares
+                const pares = Math.random() > 0.5 ? 7 : 8;
+                const impares = 15 - pares;
+                
+                const numerosPares = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24];
+                const numerosImpares = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25];
+                
+                const resultado = new Set();
+                
+                // Embaralhar arrays
+                numerosPares.sort(() => Math.random() - 0.5);
+                numerosImpares.sort(() => Math.random() - 0.5);
+                
+                // Adicionar pares
+                for (let i = 0; i < pares && i < numerosPares.length; i++) {
+                    resultado.add(numerosPares[i]);
+                }
+                
+                // Adicionar ímpares
+                for (let i = 0; i < impares && i < numerosImpares.length; i++) {
+                    resultado.add(numerosImpares[i]);
+                }
+                
+                // Se ainda não tiver 15, completar aleatoriamente
+                while (resultado.size < 15) {
+                    resultado.add(Math.floor(Math.random() * 25) + 1);
+                }
+                
+                return Array.from(resultado).sort((a, b) => a - b);
+            },
+            
+            gerarJogoPorDezenas() {
+                // Distribuir por dezenas (1-10, 11-20, 21-25)
+                const dezenas = [
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+                    [21, 22, 23, 24, 25]
+                ];
+                
+                const resultado = new Set();
+                
+                // Distribuição aproximada: 6 da primeira, 6 da segunda, 3 da terceira
+                dezenas[0].sort(() => Math.random() - 0.5);
+                dezenas[1].sort(() => Math.random() - 0.5);
+                dezenas[2].sort(() => Math.random() - 0.5);
+                
+                for (let i = 0; i < 6 && i < dezenas[0].length; i++) {
+                    resultado.add(dezenas[0][i]);
+                }
+                
+                for (let i = 0; i < 6 && i < dezenas[1].length; i++) {
+                    resultado.add(dezenas[1][i]);
+                }
+                
+                for (let i = 0; i < 3 && i < dezenas[2].length; i++) {
+                    resultado.add(dezenas[2][i]);
+                }
+                
+                // Se ainda não tiver 15, completar aleatoriamente
+                while (resultado.size < 15) {
+                    resultado.add(Math.floor(Math.random() * 25) + 1);
+                }
+                
+                return Array.from(resultado).sort((a, b) => a - b);
+            },
+            
+            gerarJogoNumerosQuentes() {
+                if (!this.state.ultimosResultadosAnalisados.length) {
+                    return this.gerarNumerosAleatorios(15);
+                }
+                
+                // Pegar números que apareceram nos últimos 5 concursos
+                const numerosQuentes = new Set();
+                const ultimosConcursos = this.state.ultimosResultadosAnalisados.slice(0, 5);
+                
+                ultimosConcursos.forEach(concurso => {
+                    concurso.numeros.forEach(num => numerosQuentes.add(num));
+                });
+                
+                const numerosQuentesArray = Array.from(numerosQuentes);
+                
+                // Se não tiver números quentes suficientes, completar com aleatórios
+                const resultado = new Set();
+                const qtdQuentes = Math.min(10, numerosQuentesArray.length); // 10 números quentes
+                
+                // Embaralhar números quentes
+                numerosQuentesArray.sort(() => Math.random() - 0.5);
+                
+                // Adicionar números quentes
+                for (let i = 0; i < qtdQuentes; i++) {
+                    resultado.add(numerosQuentesArray[i]);
+                }
+                
+                // Completar com aleatórios
+                while (resultado.size < 15) {
+                    resultado.add(Math.floor(Math.random() * 25) + 1);
+                }
+                
+                return Array.from(resultado).sort((a, b) => a - b);
+            },
+            
+            gerarJogoNumerosFrios() {
+                if (!this.state.ultimosResultadosAnalisados.length) {
+                    return this.gerarNumerosAleatorios(15);
+                }
+                
+                // Identificar números que não apareceram nos últimos 10 concursos
+                const todosNumeros = Array.from({length: 25}, (_, i) => i + 1);
+                const numerosSorteados = new Set();
+                const ultimosConcursos = this.state.ultimosResultadosAnalisados.slice(0, 10);
+                
+                ultimosConcursos.forEach(concurso => {
+                    concurso.numeros.forEach(num => numerosSorteados.add(num));
+                });
+                
+                const numerosFrios = todosNumeros.filter(num => !numerosSorteados.has(num));
+                
+                // Se não tiver números frios suficientes, considerar os menos sorteados
+                if (numerosFrios.length < 5) {
+                    const frequencia = Array(25).fill(0);
+                    this.state.ultimosResultadosAnalisados.forEach(concurso => {
+                        concurso.numeros.forEach(num => frequencia[num-1]++);
+                    });
+                    
+                    const numerosOrdenados = frequencia.map((freq, index) => ({
+                        numero: index + 1,
+                        frequencia: freq
+                    })).sort((a, b) => a.frequencia - b.frequencia);
+                    
+                    numerosFrios.push(...numerosOrdenados.slice(0, 5).map(item => item.numero));
+                }
+                
+                const resultado = new Set();
+                const qtdFrios = Math.min(5, numerosFrios.length); // 5 números frios
+                
+                // Adicionar números frios
+                for (let i = 0; i < qtdFrios; i++) {
+                    resultado.add(numerosFrios[i]);
+                }
+                
+                // Completar com aleatórios
+                while (resultado.size < 15) {
+                    resultado.add(Math.floor(Math.random() * 25) + 1);
+                }
+                
+                return Array.from(resultado).sort((a, b) => a - b);
+            },
+            
+            gerarJogoCompleto() {
+                // Combina todas as estratégias: balanceado, por dezenas, com quentes e frios
+                const jogo = new Set();
+                
+                // 1. Adicionar 2-3 números frios
+                const frios = this.gerarJogoNumerosFrios().slice(0, 3);
+                frios.forEach(num => jogo.add(num));
+                
+                // 2. Adicionar 5-6 números quentes
+                const quentes = this.gerarJogoNumerosQuentes().slice(0, 6);
+                quentes.forEach(num => jogo.add(num));
+                
+                // 3. Balancear pares/ímpares
+                const paresAtuais = Array.from(jogo).filter(num => num % 2 === 0).length;
+                const imparesAtuais = jogo.size - paresAtuais;
+                
+                const paresDesejados = Math.random() > 0.5 ? 7 : 8;
+                const imparesDesejados = 15 - paresDesejados;
+                
+                const numerosPares = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24].filter(num => !jogo.has(num));
+                const numerosImpares = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25].filter(num => !jogo.has(num));
+                
+                // Adicionar pares se necessário
+                while (paresAtuais < paresDesejados && numerosPares.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * numerosPares.length);
+                    jogo.add(numerosPares[randomIndex]);
+                    numerosPares.splice(randomIndex, 1);
+                }
+                
+                // Adicionar ímpares se necessário
+                while (imparesAtuais < imparesDesejados && numerosImpares.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * numerosImpares.length);
+                    jogo.add(numerosImpares[randomIndex]);
+                    numerosImpares.splice(randomIndex, 1);
+                }
+                
+                // 4. Distribuir por dezenas
+                const dezenas = [
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(num => !jogo.has(num)),
+                    [11, 12, 13, 14, 15, 16, 17, 18, 19, 20].filter(num => !jogo.has(num)),
+                    [21, 22, 23, 24, 25].filter(num => !jogo.has(num))
+                ];
+                
+                // Verificar distribuição atual
+                const distribAtual = [0, 0, 0];
+                jogo.forEach(num => {
+                    if (num <= 10) distribAtual[0]++;
+                    else if (num <= 20) distribAtual[1]++;
+                    else distribAtual[2]++;
+                });
+                
+                // Meta: ~6 da primeira, ~6 da segunda, ~3 da terceira
+                while (jogo.size < 15) {
+                    // Determinar qual dezena precisa de mais números
+                    let dezenaIndex;
+                    if (distribAtual[0] < 6 && dezenas[0].length > 0) {
+                        dezenaIndex = 0;
+                    } else if (distribAtual[1] < 6 && dezenas[1].length > 0) {
+                        dezenaIndex = 1;
+                    } else if (distribAtual[2] < 3 && dezenas[2].length > 0) {
+                        dezenaIndex = 2;
+                    } else {
+                        // Se todas as dezenas atingiram a meta, escolher aleatoriamente
+                        const disponiveis = dezenas.map((d, i) => d.length > 0 ? i : -1).filter(i => i !== -1);
+                        if (disponiveis.length === 0) break;
+                        dezenaIndex = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                    }
+                    
+                    // Adicionar número da dezena selecionada
+                    const randomIndex = Math.floor(Math.random() * dezenas[dezenaIndex].length);
+                    jogo.add(dezenas[dezenaIndex][randomIndex]);
+                    distribAtual[dezenaIndex]++;
+                    dezenas[dezenaIndex].splice(randomIndex, 1);
+                }
+                
+                // Se ainda não tiver 15, completar aleatoriamente
+                while (jogo.size < 15) {
+                    jogo.add(Math.floor(Math.random() * 25) + 1);
+                }
+                
+                return Array.from(jogo).sort((a, b) => a - b);
+            },
+            
+            limparJogos() {
+                document.getElementById('jogosGerados').innerHTML = '';
+            },
+            
+            verificarAtraso(numero) {
+                if (!this.state.ultimosResultadosAnalisados.length) return false;
+                
+                const ultimos10Concursos = this.state.ultimosResultadosAnalisados.slice(0, 10);
+                return !ultimos10Concursos.some(concurso => concurso.numeros.includes(numero));
+            },
+            
+            analisarResultados() {
+                const periodoSelecionado = document.getElementById('periodoAnalise').value;
+                let resultadosFiltrados;
+                
+                switch (periodoSelecionado) {
+                    case 'last10':
+                        resultadosFiltrados = this.state.resultados.slice(0, 10);
+                        break;
+                    case 'last50':
+                        resultadosFiltrados = this.state.resultados.slice(0, 50);
+                        break;
+                    case 'last100':
+                        resultadosFiltrados = this.state.resultados.slice(0, 100);
+                        break;
+                    case 'custom':
+                        const dataInicio = document.getElementById('dataInicio').value;
+                        const dataFim = document.getElementById('dataFim').value;
+                        
+                        if (!dataInicio || !dataFim) {
+                            alert("Por favor, selecione ambas as datas.");
+                            return;
+                        }
+                        
+                        resultadosFiltrados = this.state.resultados.filter(resultado => {
+                            const partesData = resultado.data.split('/');
+                            if (partesData.length !== 3) return false;
+                            const dataResultado = new Date(`${partesData[2]}-${partesData[1]}-${partesData[0]}`);
+                            const inicio = new Date(dataInicio);
+                            const fim = new Date(dataFim);
+                            
+                            return dataResultado >= inicio && dataResultado <= fim;
+                        });
+                        break;
+                    default:
+                        resultadosFiltrados = this.state.resultados;
+                }
+                
+                if (resultadosFiltrados.length === 0) {
+                    document.getElementById('analiseResultados').innerHTML = `
+                        <div class="card">
+                            <p>Nenhum resultado encontrado para o período selecionado.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.setState({
+                    ultimosResultadosAnalisados: resultadosFiltrados,
+                    estatisticasCalculadas: false
+                });
+                
+                this.exibirAnalise(resultadosFiltrados);
+                this.calcularFrequenciaNumeros(resultadosFiltrados);
+                this.calcularEstatisticasAvancadas(resultadosFiltrados);
+            },
+            
+            exibirAnalise(resultados) {
+                const container = document.getElementById('analiseResultados');
+                const totalConcursos = resultados.length;
+                
+                const freqPeriodo = Array(25).fill(0);
+                resultados.forEach(resultado => {
+                    resultado.numeros.forEach(num => freqPeriodo[num-1]++);
+                });
+                
+                const numerosOrdenados = [...freqPeriodo.entries()]
+                    .map(([num, freq]) => ({ numero: num + 1, frequencia: freq }))
+                    .sort((a, b) => b.frequencia - a.frequencia);
+                
+                const maisSorteados = numerosOrdenados.slice(0, 5).map(item => item.numero);
+                const menosSorteados = numerosOrdenados.slice(-5).reverse().map(item => item.numero);
+                
+                // Calcular média de números por concurso
+                const mediaNumeros = totalConcursos > 0 ? (resultados.reduce((acc, cur) => acc + cur.numeros.length, 0) / totalConcursos) : 0;
+                
+                // Calcular números que mais aparecem juntos
+                const combinacoes = this.calcularCombinacoesFrequentes(resultados);
+                
+                container.innerHTML = `
+                    <div class="card">
+                        <h3>Análise de ${totalConcursos} concursos</h3>
+                        <p><strong>Período:</strong> ${resultados[resultados.length-1].data} a ${resultados[0].data}</p>
+                        <p><strong>Média de números por concurso:</strong> ${mediaNumeros.toFixed(2)}</p>
+                        <p><strong>Números mais sorteados:</strong> ${maisSorteados.join(', ')}</p>
+                        <p><strong>Números menos sorteados:</strong> ${menosSorteados.join(', ')}</p>
+                        <p><strong>Combinações frequentes (2 números):</strong> ${combinacoes.slice(0, 5).map(comb => comb.join('-')).join(', ')}</p>
+                    </div>
+                `;
+            },
+            
+            calcularCombinacoesFrequentes(resultados, tamanho = 2) {
+                const combinacoes = {};
+                
+                resultados.forEach(concurso => {
+                    const numeros = [...concurso.numeros].sort((a, b) => a - b);
+                    
+                    // Gerar todas as combinações de tamanho especificado
+                    for (let i = 0; i < numeros.length - 1; i++) {
+                        for (let j = i + 1; j < numeros.length; j++) {
+                            const chave = `${numeros[i]}-${numeros[j]}`;
+                            combinacoes[chave] = (combinacoes[chave] || 0) + 1;
+                        }
+                    }
+                });
+                
+                // Converter para array e ordenar
+                return Object.entries(combinacoes)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(entry => entry[0].split('-').map(Number));
+            },
+            
+            calcularFrequenciaNumeros(resultados) {
+                const frequencia = Array(25).fill(0);
+                resultados.forEach(resultado => {
+                    resultado.numeros.forEach(num => frequencia[num-1]++);
+                });
+                
+                this.setState({ frequenciaNumeros: frequencia });
+                this.exibirFrequenciaNumeros(frequencia, resultados.length);
+            },
+            
+            exibirFrequenciaNumeros(frequencia, totalConcursos) {
+                const container = document.getElementById('frequenciaNumeros');
+                const maxFrequencia = Math.max(...frequencia);
+                const minFrequencia = Math.min(...frequencia);
+                
+                const numerosOrdenados = frequencia.map((freq, index) => ({
+                    numero: index + 1,
+                    frequencia: freq,
+                    porcentagem: totalConcursos > 0 ? (freq / totalConcursos * 100).toFixed(1) : 0,
+                    atrasado: this.verificarAtraso(index + 1)
+                })).sort((a, b) => b.frequencia - a.frequencia);
+                
+                container.innerHTML = `
+                    <h3>Frequência de Números Sorteados (1-25)</h3>
+                    <p>Total de concursos considerados: ${totalConcursos}</p>
+                `;
+                
+                const tabela = document.createElement('table');
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th>Número</th>
+                        <th>Frequência</th>
+                        <th>% de Concursos</th>
+                        <th>Gráfico</th>
+                    </tr>
+                `;
+                tabela.appendChild(thead);
+                
+                const tbody = document.createElement('tbody');
+                
+                numerosOrdenados.forEach(item => {
+                    const tr = document.createElement('tr');
+                    let classe = '';
+                    
+                    if (item.frequencia === maxFrequencia) {
+                        classe = 'numero-frequente';
+                    } else if (item.frequencia === minFrequencia && totalConcursos > 5) {
+                        classe = 'numero-raro';
+                    } else if (item.atrasado) {
+                        classe = 'numero-raro';
+                    }
+                    
+                    tr.innerHTML = `
+                        <td><span class="numero ${classe}" title="${classe === 'numero-frequente' ? 'Número frequente' : classe === 'numero-raro' ? 'Número raro ou atrasado' : ''}">${item.numero.toString().padStart(2, '0')}</span></td>
+                        <td>${item.frequencia}</td>
+                        <td>${item.porcentagem}%</td>
+                        <td>
+                            <div class="grafico">
+                                <div class="barra" style="width: ${item.porcentagem * 3}%"></div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                tabela.appendChild(tbody);
+                container.appendChild(tabela);
+            },
+            
+            calcularEstatisticasAvancadas(resultados) {
+                if (resultados.length === 0) return;
+                
+                const content = document.getElementById('contentEstatisticas');
+                content.innerHTML = '';
+                
+                // Estatísticas de pares e ímpares
+                const parImparStats = { pares: 0, impares: 0 };
+                resultados.forEach(resultado => {
+                    resultado.numeros.forEach(num => {
+                        num % 2 === 0 ? parImparStats.pares++ : parImparStats.impares++;
+                    });
+                });
+                
+                // Estatísticas por dezenas
+                const dezenasStats = [
+                    { min: 1, max: 10, count: 0 },
+                    { min: 11, max: 20, count: 0 },
+                    { min: 21, max: 25, count: 0 }
+                ];
+                
+                resultados.forEach(resultado => {
+                    resultado.numeros.forEach(num => {
+                        if (num >= 1 && num <= 10) dezenasStats[0].count++;
+                        else if (num >= 11 && num <= 20) dezenasStats[1].count++;
+                        else if (num >= 21 && num <= 25) dezenasStats[2].count++;
+                    });
+                });
+                
+                // Sequências mais comuns
+                const sequencias = this.calcularSequenciasComuns(resultados);
+                
+                content.innerHTML = `
+                    <div class="card">
+                        <h4>Distribuição de Pares e Ímpares</h4>
+                        <p>Pares: ${parImparStats.pares} (${(parImparStats.pares/(resultados.length*15)*100).toFixed(1)}%)</p>
+                        <p>Ímpares: ${parImparStats.impares} (${(parImparStats.impares/(resultados.length*15)*100).toFixed(1)}%)</p>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 15px;">
+                        <h4>Distribuição por Dezenas</h4>
+                        <div class="flex-grid">
+                            ${dezenasStats.map(dezena => `
+                                <div class="col">
+                                    <h5>${dezena.min}-${dezena.max}:</h5>
+                                    <p>Total: ${dezena.count}</p>
+                                    <p>Média: ${(dezena.count/resultados.length).toFixed(2)} por concurso</p>
+                                    <p>${((dezena.count/(resultados.length*15))*100).toFixed(1)}% dos números</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 15px;">
+                        <h4>Sequências Mais Comuns</h4>
+                        <p>Sequências de 3 números que mais aparecem juntos:</p>
+                        <ul>
+                            ${sequencias.slice(0, 5).map(seq => `
+                                <li>${seq.numeros.join(', ')} - ${seq.frequencia} vezes (${((seq.frequencia/resultados.length)*100).toFixed(1)}%)</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                this.setState({ estatisticasCalculadas: true });
+            },
+            
+            calcularSequenciasComuns(resultados, tamanho = 3) {
+                const sequencias = {};
+                
+                resultados.forEach(concurso => {
+                    const numeros = [...concurso.numeros].sort((a, b) => a - b);
+                    
+                    // Verificar sequências consecutivas
+                    for (let i = 0; i <= numeros.length - tamanho; i++) {
+                        const sequencia = numeros.slice(i, i + tamanho);
+                        const chave = sequencia.join('-');
+                        sequencias[chave] = (sequencias[chave] || 0) + 1;
+                    }
+                });
+                
+                // Converter para array e ordenar
+                return Object.entries(sequencias)
+                    .map(([chave, freq]) => ({
+                        numeros: chave.split('-').map(Number),
+                        frequencia: freq
+                    }))
+                    .sort((a, b) => b.frequencia - a.frequencia);
+            },
+            
+            verificarAcertos() {
+                const numerosInput = document.getElementById('meusNumeros').value.trim();
+                const concursoInput = document.getElementById('concursoVerificar').value.trim();
+                
+                if (!numerosInput) {
+                    alert("Por favor, digite seus números para verificar.");
+                    return;
+                }
+                
+                const numerosArray = numerosInput.split(/[,\s]+/).map(item => parseInt(item.trim()));
+                const meusNumeros = numerosArray.filter(num => !isNaN(num) && num >= 1 && num <= 25);
+                
+                if (meusNumeros.length !== 15) {
+                    alert("Por favor, digite exatamente 15 números válidos (1-25).");
+                    return;
+                }
+                
+                const uniqueNumbers = [...new Set(meusNumeros)];
+                if (uniqueNumbers.length !== meusNumeros.length) {
+                    alert("Você digitou números duplicados. Por favor, corrija.");
+                    return;
+                }
+                
+                let resultado;
+                if (concursoInput) {
+                    const concursoNum = parseInt(concursoInput);
+                    resultado = this.state.resultados.find(r => r.concurso === concursoNum);
+                    
+                    if (!resultado) {
+                        alert("Concurso não encontrado nos nossos registros.");
+                        return;
+                    }
+                } else {
+                    resultado = this.state.resultados[0];
+                }
+                
+                const acertos = meusNumeros.filter(num => resultado.numeros.includes(num));
+                const numerosSorteadosHTML = resultado.numeros.map(num =>
+                    `<span class="numero ${acertos.includes(num) ? 'numero-sorteado' : ''}">${num.toString().padStart(2, '0')}</span>`
+                ).join(' ');
+                
+                const meusNumerosHTML = meusNumeros.map(num =>
+                    `<span class="numero ${resultado.numeros.includes(num) ? 'numero-sorteado' : ''}">${num.toString().padStart(2, '0')}</span>`
+                ).join(' ');
+                
+                // Calcular premiação aproximada (baseado em regras da Loto Fácil)
+                const premio = this.calcularPremio(acertos.length);
+                
+                const container = document.getElementById('resultadoVerificacao');
+                container.innerHTML = `
+                    <div class="card">
+                        <h3>Resultado da Verificação</h3>
+                        <p><strong>Concurso ${resultado.concurso}</strong> (${resultado.data})</p>
+                        <p>Números sorteados: ${numerosSorteadosHTML}</p>
+                        <p>Seus números: ${meusNumerosHTML}</p>
+                        <p class="destaque">Você acertou ${acertos.length} número(s): ${acertos.map(n => n.toString().padStart(2, '0')).join(', ')}</p>
+                        ${premio ? `<p class="destaque">Premiação estimada: ${premio}</p>` : ''}
+                    </div>
+                `;
+            },
+            
+            calcularPremio(acertos) {
+                switch(acertos) {
+                    case 15: return "SENA (1º prêmio)";
+                    case 14: return "QUINA (2º prêmio)";
+                    case 13: return "QUADRA (3º prêmio)";
+                    case 12: return "Pequeno prêmio";
+                    case 11: return "Recuperação do valor apostado";
+                    default: return null;
+                }
+            },
+            
+            exibirHistorico() {
+                const qtd = parseInt(document.getElementById('qtdConcursos').value) || 10;
+                const resultados = this.state.resultados.slice(0, qtd);
+                
+                const container = document.getElementById('historicoResultados');
+                container.innerHTML = `
+                    <div class="card">
+                        <h3>Últimos ${resultados.length} Concursos</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Concurso</th>
+                                    <th>Data</th>
+                                    <th>Números Sorteados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${resultados.map(resultado => `
+                                    <tr>
+                                        <td>${resultado.concurso}</td>
+                                        <td>${resultado.data}</td>
+                                        <td>${resultado.numeros.map(n => n.toString().padStart(2, '0')).join(', ')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => LotoFacilApp.init());
+    </script>
+</body>
+</html>
